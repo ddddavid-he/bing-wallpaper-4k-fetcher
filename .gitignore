@@ -1,0 +1,9 @@
+.DS_Store
+**/.DS_Store
+wallpaper/*
+*.log
+**/img_cache
+wget-log
+0
+**/tmp
+
