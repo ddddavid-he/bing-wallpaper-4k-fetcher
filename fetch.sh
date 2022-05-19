@@ -1,6 +1,6 @@
 #!/bin/bash
 
-img_dir="./wallpaper"
+img_dir="./wallpaper/images"
 cache_dir="./cache"
 if [[ ${OSTYPE} == "linux"* ]];then
     word_count="wc --lines"
@@ -36,7 +36,8 @@ sed -n '2,$p' ${cache_dir}/bing-wallpaper.md > ${cache_dir}/tmp
 
 sed -e '/^$/d' -e 's/^20\(.*-[0-9][0-9]\).*$/\1/g' -e 's/-//g' ${cache_dir}/tmp > ${cache_dir}/dates
 sed -e '/^$/d' -e 's/^.*\(https.*\.jpg\).*$/\1/g' ${cache_dir}/tmp > ${cache_dir}/urls
-sed -n '1p' ${cache_dir}/tmp | sed 's/^.*\[\(.*\)\].*$/\1/' > ${cache_dir}/today
+#sed -n '1p' ${cache_dir}/tmp | sed 's/^.*\[\(.*\)\].*$/\1/' > ${cache_dir}/today
+sed -e '/^$/d' -e '1,$s/^.*\[\(.*\)\].*$/\1/g' ${cache_dir}/tmp > ${cache_dir}/titles
 
 line_num=`${word_count} ${cache_dir}/dates | awk '{print $1}'`
 for ((i=1; i<=line_num; i++));do
@@ -51,17 +52,21 @@ for ((i=1; i<=line_num; i++));do
     fi
 done
 
-
+mv html/page-*.html ${cache_dir}/
 python3 generate_html.py
 
 line_num=`${word_count} html/bing.html | awk '{print $1}'`
 if [ ${line_num} != 0 ];then
-    cp html/bing.html wallpaper/
+    rm -f wallpaper/html/page-*.html ${cache_dir}/page-*.html
+    cp html/bing.html wallpaper/html/index.html
+    cp html/page-*.html wallpaper/html/
 else
-    exit 1
+    mv ${cache_dir}/page-*.html html/
+    echo Python script failed 
+    exit 2
 fi
 
-rm -f ${cache_dir}/img_cache ${cache_dir}/tmp wget-log
+rm -f ${cache_dir}/img_cache ${cache_dir}/tmp wget-log 
 
 exit 0
 
